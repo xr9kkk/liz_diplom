@@ -1,66 +1,143 @@
 import string
-import itertools
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from queue import Queue
 
 
-def generate_points(columns, rows, shelves):
-    """Генерирует список точек склада с учетом полок."""
-    return [f"{col}{row}-{shelf}" for col in columns for row in rows for shelf in shelves]
+def generate_warehouse_map():
+    """
+    Создаёт карту склада с указанием стеллажей и проходимых зон.
+    """
+    warehouse = {}
+    for row in range(1, 14):  # Ряды 1-13
+        for col in string.ascii_uppercase[:13]:  # Секции A-M
+            for level in range(1, 4):  # Уровни 1-3
+                cell = f"{col}-{row}-{level}"
+                # Стеллажи
+                if row in [2, 3, 4] and col in "BCEFHIKL":
+                    warehouse[cell] = "shelf"
+                else:
+                    warehouse[cell] = "free"
+    return warehouse
 
 
-def calculate_distance(point1, point2):
-    """Вычисляет расстояние между двумя точками с учетом высоты."""
-    col1, row1, shelf1 = point1[0], int(point1[1]), int(point1.split('-')[1])
-    col2, row2, shelf2 = point2[0], int(point2[1]), int(point2.split('-')[1])
+def is_valid_move(current, next_point, warehouse):
+    """
+    Проверяет, можно ли двигаться из текущей точки в следующую.
+    """
+    if next_point not in warehouse or warehouse[next_point] == "shelf":
+        return False
 
-    # Переводим буквы столбцов в числа для расчёта
-    x1, x2 = string.ascii_lowercase.index(col1), string.ascii_lowercase.index(col2)
+    # Проверяем движение только по вертикали или горизонтали
+    cur_col, cur_row, cur_level = current.split('-')
+    next_col, next_row, next_level = next_point.split('-')
+    cur_row, next_row = int(cur_row), int(next_row)
+    cur_level, next_level = int(cur_level), int(next_level)
 
-    # Манхэттенское расстояние
-    horizontal_distance = abs(x1 - x2) + abs(row1 - row2)
-
-    # Затраты на высоту
-    height_cost = abs(shelf1 - shelf2) * 2  # 2 шага на каждый уровень
-
-    return horizontal_distance + height_cost
-
-
-def find_shortest_route(start, waypoints, end):
-    """Ищет кратчайший маршрут через все заданные точки."""
-    all_points = [start] + waypoints + [end]
-    all_permutations = list(itertools.permutations(waypoints))
-    min_distance = float('inf')
-    best_path = None
-
-    for perm in all_permutations:
-        route = [start] + list(perm) + [end]
-        distance = sum(calculate_distance(route[i], route[i + 1]) for i in range(len(route) - 1))
-        if distance < min_distance:
-            min_distance = distance
-            best_path = route
-
-    return best_path, min_distance
+    if cur_col == next_col and cur_row == next_row and abs(cur_level - next_level) == 1:
+        return True  # Переход между уровнями
+    if cur_level == next_level:
+        if cur_col == next_col and abs(cur_row - next_row) == 1:
+            return True  # Вертикальное движение
+        if cur_row == next_row and abs(ord(cur_col) - ord(next_col)) == 1:
+            return True  # Горизонтальное движение
+    return False
 
 
+def bfs_shortest_path(start, end, warehouse):
+    """
+    Находит кратчайший путь с учётом ограничений движения.
+    """
+    queue = Queue()
+    queue.put([start])
+    visited = set()
+
+    while not queue.empty():
+        path = queue.get()
+        current = path[-1]
+
+        if current == end:
+            return path
+
+        if current in visited:
+            continue
+        visited.add(current)
+
+        # Проверяем соседние клетки
+        cur_col, cur_row, cur_level = current.split('-')
+        cur_row, cur_level = int(cur_row), int(cur_level)
+        neighbors = [
+            f"{cur_col}-{cur_row + 1}-{cur_level}",  # Вверх
+            f"{cur_col}-{cur_row - 1}-{cur_level}",  # Вниз
+            f"{chr(ord(cur_col) + 1)}-{cur_row}-{cur_level}",  # Вправо
+            f"{chr(ord(cur_col) - 1)}-{cur_row}-{cur_level}",  # Влево
+            f"{cur_col}-{cur_row}-{cur_level + 1}",  # Подъём на уровень выше
+            f"{cur_col}-{cur_row}-{cur_level - 1}",  # Спуск на уровень ниже
+        ]
+
+        for neighbor in neighbors:
+            if is_valid_move(current, neighbor, warehouse):
+                queue.put(path + [neighbor])
+    return None  # Если путь не найден
 
 
-start =('g1-1').strip()
-end = ("g13-1").strip()
+def plot_3d_route(route, warehouse):
+    """
+    Визуализация маршрута в 3D.
+    """
+    x_coords, y_coords, z_coords = [], [], []
 
-# Шаг 1: Задаём параметры склада
-columns = list("abcdefgh")  # Столбцы от 'a' до 'h'
-rows = range(1, 14)  # Ряды от 1 до 13
-shelves = range(1, 4)  # Полки от 1 до 3
+    for point in route:
+        col, row, level = point.split('-')
+        x_coords.append(ord(col) - ord('A'))
+        y_coords.append(int(row) - 1)
+        z_coords.append(int(level) - 1)
 
-# Генерация всех точек склада (на случай валидации)
-valid_points = generate_points(columns, rows, shelves)
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot(x_coords, y_coords, z_coords, marker='o', color='b', label='Route')
+    ax.scatter(x_coords, y_coords, z_coords, c='r', s=50, label='Waypoints')
 
-waypoints = input("Промежуточные точки: ").strip().split(",")
-waypoints = [point.strip() for point in waypoints if point.strip()]
+    # Отмечаем стеллажи
+    for cell, status in warehouse.items():
+        if status == "shelf":
+            col, row, level = cell.split('-')
+            x = ord(col) - ord('A')
+            y = int(row) - 1
+            z = int(level) - 1
+            ax.scatter(x, y, z, c='k', s=100, label='Shelf' if 'Shelf' not in ax.legend_.texts else None)
 
-# Шаг 3: Находим кратчайший маршрут
-best_route, total_distance = find_shortest_route(start, waypoints, end)
+    ax.set_title("Warehouse Route (3D View)")
+    ax.set_xlabel("Columns (A-M)")
+    ax.set_ylabel("Rows (1-13)")
+    ax.set_zlabel("Levels")
+    plt.legend()
+    plt.show()
 
 
-# Вывод результата
-print("\nЛучший маршрут:", " -> ".join(best_route))
-print("Общее расстояние:", total_distance)
+def main():
+    warehouse = generate_warehouse_map()
+
+    print("Введите начальную точку (например, A-1-1):")
+    start = input().strip().upper()
+
+    print("Введите конечную точку (например, M-13-1):")
+    end = input().strip().upper()
+
+    if start not in warehouse or warehouse[start] == "shelf":
+        print(f"Точка {start} недоступна!")
+        return
+    if end not in warehouse or warehouse[end] == "shelf":
+        print(f"Точка {end} недоступна!")
+        return
+
+    shortest_path = bfs_shortest_path(start, end, warehouse)
+    if shortest_path:
+        print("Кратчайший маршрут:", " -> ".join(shortest_path))
+        plot_3d_route(shortest_path, warehouse)
+    else:
+        print("Путь не найден!")
+
+
+if __name__ == "__main__":
+    main()
