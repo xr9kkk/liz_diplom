@@ -78,7 +78,7 @@ def bfs_shortest_path(start, end, warehouse):
         for neighbor in neighbors:
             if is_valid_move(current, neighbor, warehouse):
                 queue.put(path + [neighbor])
-    return None  # Если путь не найден
+    return None  
 
 
 def plot_3d_route(route, warehouse):
@@ -98,7 +98,6 @@ def plot_3d_route(route, warehouse):
     ax.plot(x_coords, y_coords, z_coords, marker='o', color='b', label='Route')
     ax.scatter(x_coords, y_coords, z_coords, c='r', s=50, label='Waypoints')
 
-    # Отмечаем стеллажи
     shelf_added = False
     for cell, status in warehouse.items():
         if status == "shelf":
@@ -123,11 +122,11 @@ def plot_3d_route(route, warehouse):
 def main():
     warehouse = generate_warehouse_map()
 
-    print("Введите начальную точку (например, A-1-1):")
-    start = input().strip().upper()
+    # print("Введите начальную точку (например, A-1-1):")
+    start = ("g-1-3").strip().upper()
 
-    print("Введите конечную точку (например, M-13-1):")
-    end = input().strip().upper()
+    # print("Введите конечную точку (например, M-13-1):")
+    end = ("g-13-1").strip().upper()
 
     if start not in warehouse or warehouse[start] == "shelf":
         print(f"Точка {start} недоступна!")
@@ -142,6 +141,7 @@ def main():
         plot_3d_route(shortest_path, warehouse)
     else:
         print("Путь не найден!")
+    plot_3d_route(shortest_path, warehouse)        
 
 
 if __name__ == "__main__":
