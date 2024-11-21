@@ -99,19 +99,24 @@ def plot_3d_route(route, warehouse):
     ax.scatter(x_coords, y_coords, z_coords, c='r', s=50, label='Waypoints')
 
     # Отмечаем стеллажи
+    shelf_added = False
     for cell, status in warehouse.items():
         if status == "shelf":
             col, row, level = cell.split('-')
             x = ord(col) - ord('A')
             y = int(row) - 1
             z = int(level) - 1
-            ax.scatter(x, y, z, c='k', s=100, label='Shelf' if 'Shelf' not in ax.legend_.texts else None)
+            if not shelf_added:
+                ax.scatter(x, y, z, c='k', s=100, label='Shelf')
+                shelf_added = True
+            else:
+                ax.scatter(x, y, z, c='k', s=100)
 
     ax.set_title("Warehouse Route (3D View)")
     ax.set_xlabel("Columns (A-M)")
     ax.set_ylabel("Rows (1-13)")
     ax.set_zlabel("Levels")
-    plt.legend()
+    ax.legend()
     plt.show()
 
 
