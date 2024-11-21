@@ -174,7 +174,6 @@ def reconstruct_path(order, warehouse):
     return full_path
 
 def main():
-    print("hui")
     warehouse = generate_warehouse_map()
 
     start_point = "G-1-1"
