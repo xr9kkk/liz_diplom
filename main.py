@@ -52,16 +52,22 @@ def find_accessible_points(shelf_point, warehouse):
     row, level = int(row), int(level)
     accessible_points = []
 
-    if level == 2: 
-        candidates = [
-            f"{chr(ord(col) - 1)}-{row}-{level}",  
-            f"{chr(ord(col) + 1)}-{row}-{level}", 
-            f"{col}-{row - 1}-{level}", 
-            f"{col}-{row + 1}-{level}",  
-        ]
-        for candidate in candidates:
-            if candidate in warehouse and warehouse[candidate] == "free":
-                accessible_points.append(candidate)
+    # Доступные точки на том же уровне
+    candidates = [
+        f"{chr(ord(col) - 1)}-{row}-{level}",  # Слева
+        f"{chr(ord(col) + 1)}-{row}-{level}",  # Справа
+        f"{col}-{row - 1}-{level}",  # Вверх
+        f"{col}-{row + 1}-{level}",  # Вниз
+    ]
+    # Проверяем переходы между уровнями
+    if level > 1:
+        candidates.append(f"{col}-{row}-{level - 1}")  # На уровень ниже
+    if level < 3:
+        candidates.append(f"{col}-{row}-{level + 1}")  # На уровень выше
+
+    for candidate in candidates:
+        if candidate in warehouse and warehouse[candidate] == "free":
+            accessible_points.append(candidate)
 
     return accessible_points
 
