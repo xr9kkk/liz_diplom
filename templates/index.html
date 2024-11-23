@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Route Planner</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Warehouse Route Planner</h1>
+    <form id="routeForm">
+        <label for="start">Start Point:</label>
+        <input type="text" id="start" name="start" placeholder="G-1-1" required>
+        
+        <label for="end">End Point:</label>
+        <input type="text" id="end" name="end" placeholder="G-13-1" required>
+        
+        <label for="points">Intermediate Points (comma-separated):</label>
+        <input type="text" id="points" name="points" placeholder="A-1-1, B-2-1">
+        
+        <button type="submit">Calculate Route</button>
+    </form>
+    
+    <div id="result"></div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
