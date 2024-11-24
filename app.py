@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, jsonify
-from warehouse_logic import generate_warehouse_map, calculate_distances, find_optimal_path, reconstruct_path, plot_3d_route, find_accessible_points
-import os
+import warehouse_logic as wl
+
 
 app = Flask(__name__)
-warehouse = generate_warehouse_map()
+warehouse = wl.generate_warehouse_map()
+
+
 
 @app.route('/')
 def index():
@@ -12,7 +14,7 @@ def index():
 @app.route('/calculate', methods=['POST'])
 def calculate_route():
     data = request.json  # Получаем данные из запроса
-    warehouse = generate_warehouse_map()
+    warehouse = wl.generate_warehouse_map()
 
     start_point = data.get("start_point", "").strip().upper()
     end_point = data.get("end_point", "").strip().upper()
@@ -26,7 +28,7 @@ def calculate_route():
     for point in intermediate_points:
         if point not in warehouse or warehouse[point] != "shelf":
             return jsonify({"error": f"Точка {point} недоступна!"}), 400
-        access_points = find_accessible_points(point, warehouse)
+        access_points = wl.find_accessible_points(point, warehouse)
         if access_points:
             points.append(access_points[0])
         else:
@@ -35,23 +37,45 @@ def calculate_route():
     points.append(end_point)
 
     # Вычисление маршрута
-    distances = calculate_distances(points, warehouse)
-    optimal_order = [start_point] + list(find_optimal_path(points[1:-1], distances)) + [end_point]
+    distances = wl.calculate_distances(points, warehouse)
+    optimal_order = [start_point] + list(wl.find_optimal_path(points[1:-1], distances)) + [end_point]
 
     if not optimal_order:
         return jsonify({"error": "Не удалось найти оптимальный порядок точек!"}), 400
 
-    shortest_path = reconstruct_path(optimal_order, warehouse)
+    shortest_path = wl.reconstruct_path(optimal_order, warehouse)
     if not shortest_path:
         return jsonify({"error": "Не удалось построить маршрут!"}), 400
 
-    # Возвращаем результат в JSON-формате
+    # Преобразование маршрута в координаты для визуализации
+    # Предположим, что shortest_path - это список точек вида "A-01-01", "B-02-03" и т.д.
+    x_coords = []
+    y_coords = []
+    z_coords = []
+
+    # Преобразование точек маршрута в координаты (x, y, z) для визуализации
+    for point in shortest_path:
+        shelf, layer, row = point.split('-')
+        x_coords.append(ord(shelf[0]) - ord('A') + 1)
+        y_coords.append(int(layer))     # Ярусы 1-3
+        z_coords.append(int(row))       # Ряды 1-13
+
     response = {
         "optimal_order": optimal_order,
         "shortest_path": shortest_path,
         "steps_count": len(shortest_path),
+        "coordinates": {
+            "x": x_coords,
+            "y": y_coords,
+            "z": z_coords
+        }
     }
+
     return jsonify(response)
+
+@app.route('/result')
+def result():
+    return render_template('result.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

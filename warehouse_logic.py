@@ -1,41 +1,7 @@
 import string
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from queue import Queue
 from itertools import permutations
-
-def plot_3d_route(route, warehouse):
-    x_coords, y_coords, z_coords = [], [], []
-
-    for point in route:
-        col, row, level = point.split('-')
-        x_coords.append(ord(col) - ord('A'))
-        y_coords.append(int(row) - 1)
-        z_coords.append(int(level) - 1)
-
-    fig = plt.figure(figsize=(10, 8))
-    ax = fig.add_subplot(111, projection='3d')
-    ax.plot(x_coords, y_coords, z_coords, marker='o', color='b', label='Route')
-    ax.scatter(x_coords, y_coords, z_coords, c='r', s=50, label='Waypoints')
-
-    for cell, status in warehouse.items():
-        if status == "shelf":
-            col, row, level = cell.split('-')
-            x = ord(col) - ord('A')
-            y = int(row) - 1
-            z = int(level) - 1
-            ax.scatter(x, y, z, c='k', s=100)
-
-    ax.set_title("Warehouse Route (3D View)")
-    ax.set_xlabel("Columns (A-M)")
-    ax.set_xticks(range(1, 13))
-    ax.set_ylabel("Rows (1-13)")
-    ax.set_yticks(range(1,13))
-    ax.set_zlabel("Levels")
-    ax.set_zticks(range(1,3))
-    ax.legend()
-    plt.show()
-    
+ 
 def generate_warehouse_map():
     warehouse = {}
     for row in range(1, 14):  
@@ -170,50 +136,3 @@ def reconstruct_path(order, warehouse):
                 segment = segment[1:] 
             full_path.extend(segment)
     return full_path
-
-def main():
-    warehouse = generate_warehouse_map()
-
-    start_point = "G-1-1"
-    end_point = "G-13-1"
-
-    points = [start_point]
-
-    print("Введите точки маршрута в формате 'A-1-1'. Для завершения ввода введите 'end'.")
-    while True:
-        point = input("Точка: ").strip().upper()
-        if point == "END":
-            break
-        if point not in warehouse or warehouse[point] != "shelf":
-            print(f"Точка {point} недоступна!")
-            continue
-        access_points = find_accessible_points(point, warehouse)
-        if access_points:
-            points.append(access_points[0])
-        else:
-            print(f"Не удалось найти доступные точки для {point}.")
-
-    points.append(end_point)
-
-    if len(points) < 2:
-        print("Нужно указать как минимум начальную и конечную точку!")
-        return
-
-    distances = calculate_distances(points, warehouse)
-    optimal_order = [start_point] + list(find_optimal_path(points[1:-1], distances)) + [end_point]
-
-    if not optimal_order:
-        print("Не удалось найти оптимальный порядок точек!")
-        return
-
-    print("Оптимальный порядок точек:", " -> ".join(optimal_order))
-    shortest_path = reconstruct_path(optimal_order, warehouse)
-    if shortest_path:
-        print("Кратчайший маршрут:", " -> ".join(shortest_path))
-        print("Количество шагов:", len(shortest_path))
-        plot_3d_route(shortest_path, warehouse)
-    else:
-        print("Не удалось построить маршрут!")
-
-if __name__ == "__main__":
-    main()

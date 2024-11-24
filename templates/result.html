@@ -12,8 +12,14 @@
         <p>Оптимальный порядок точек: {{ optimal_order }}</p>
         <p>Кратчайший маршрут: {{ shortest_path }}</p>
         <p>Количество шагов: {{ steps_count }}</p>
-        <img src="{{ plot_path }}" alt="Маршрут">
+        
         <a href="/">Назад</a>
     </div>
+
+    <!-- Контейнер для визуализации графика -->
+    <div id="root"></div>
+
+    <!-- Подключение React-компонента -->
+    <script type="module" src="/static/visual.js"></script>
 </body>
 </html>
