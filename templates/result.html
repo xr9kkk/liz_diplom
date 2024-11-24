@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты маршрута</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Результаты маршрута</h1>
+        <p>Оптимальный порядок точек: {{ optimal_order }}</p>
+        <p>Кратчайший маршрут: {{ shortest_path }}</p>
+        <p>Количество шагов: {{ steps_count }}</p>
+        <img src="{{ plot_path }}" alt="Маршрут">
+        <a href="/">Назад</a>
+    </div>
+</body>
+</html>

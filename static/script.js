@@ -1,30 +1,35 @@
-document.getElementById("routeForm").addEventListener("submit", async function (event) {
+document.getElementById("route-form").addEventListener("submit", function (event) {
     event.preventDefault();
 
-    const start = document.getElementById("start").value.trim();
-    const end = document.getElementById("end").value.trim();
-    const points = document.getElementById("points").value.trim().split(",").map(p => p.trim());
+    const startPoint = document.getElementById("start-point").value;
+    const endPoint = document.getElementById("end-point").value;
+    const points = document.getElementById("points").value.split(',').map(p => p.trim());
 
-    const response = await fetch('/route', {
+    fetch('/calculate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ start, end, points }),
-    });
-
-    const resultDiv = document.getElementById("result");
-    resultDiv.innerHTML = "";
-
-    if (response.ok) {
-        const data = await response.json();
-        resultDiv.innerHTML = `
-            <h3>Shortest Path:</h3>
-            <p>${data.path.join(" -> ")}</p>
-            <p>Steps: ${data.steps}</p>
-        `;
-    } else {
-        const error = await response.json();
-        resultDiv.innerHTML = `<p style="color: red;">Error: ${error.error}</p>`;
-    }
+        body: JSON.stringify({
+            start_point: startPoint,
+            end_point: endPoint,
+            points: points,
+        }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById("result").innerHTML = `<p style="color: red;">Ошибка: ${data.error}</p>`;
+            } else {
+                document.getElementById("result").innerHTML = `
+                    <p>Оптимальный порядок точек: ${data.optimal_order.join(' -> ')}</p>
+                    <p>Кратчайший маршрут: ${data.shortest_path.join(' -> ')}</p>
+                    <p>Количество шагов: ${data.steps_count}</p>
+                    <img src="${data.plot_path}" alt="Маршрут">
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
 });

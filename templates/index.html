@@ -1,28 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warehouse Route Planner</title>
+    <title>Маршрутизатор склада</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Warehouse Route Planner</h1>
-    <form id="routeForm">
-        <label for="start">Start Point:</label>
-        <input type="text" id="start" name="start" placeholder="G-1-1" required>
-        
-        <label for="end">End Point:</label>
-        <input type="text" id="end" name="end" placeholder="G-13-1" required>
-        
-        <label for="points">Intermediate Points (comma-separated):</label>
-        <input type="text" id="points" name="points" placeholder="A-1-1, B-2-1">
-        
-        <button type="submit">Calculate Route</button>
-    </form>
-    
-    <div id="result"></div>
+    <div class="container">
+        <h1>Маршрутизатор склада</h1>
+        <form id="route-form">
+            <label for="start-point">Начальная точка:</label>
+            <input type="text" id="start-point" name="start_point" placeholder="Например, G-1-1" required>
 
+            <label for="end-point">Конечная точка:</label>
+            <input type="text" id="end-point" name="end_point" placeholder="Например, G-13-1" required>
+
+            <label for="points">Точки маршрута (через запятую):</label>
+            <input type="text" id="points" name="points" placeholder="Например, A-1-1, B-2-2">
+
+            <button type="submit">Рассчитать</button>
+        </form>
+        <div id="result"></div>
+    </div>
     <script src="/static/script.js"></script>
 </body>
 </html>
