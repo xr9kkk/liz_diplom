@@ -46,3 +46,10 @@ button {
 button:hover {
     background: #0056b3;
 }
+
+
+#visualization-container {
+    width: 100%;   /* Заполняет доступную ширину */
+    height: 500px; /* Устанавливает фиксированную высоту */
+    background-color: #f0f0f0; /* Цвет фона для визуализации */
+}

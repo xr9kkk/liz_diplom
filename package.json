@@ -10,9 +10,13 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@react-three/drei": "^9.117.3",
+    "@react-three/fiber": "^8.17.10",
+    "axios": "^1.7.8",
     "plotly.js": "^2.35.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-plotly.js": "^2.6.0"
+    "react-plotly.js": "^2.6.0",
+    "three": "^0.170.0"
   }
 }

@@ -18,13 +18,6 @@ def plot_3d_route(route, warehouse):
     ax.plot(x_coords, y_coords, z_coords, marker='o', color='b', label='Route')
     ax.scatter(x_coords, y_coords, z_coords, c='r', s=50, label='Waypoints')
 
-    for cell, status in warehouse.items():
-        if status == "shelf":
-            col, row, level = cell.split('-')
-            x = ord(col) - ord('A')
-            y = int(row) - 1
-            z = int(level) - 1
-            ax.scatter(x, y, z, c='k', s=100)
 
     ax.set_title("Warehouse Route (3D View)")
     ax.set_xlabel("Columns (A-M)")
@@ -81,7 +74,7 @@ def calculate_distances(points, warehouse):
     return distances
 
 
-def is_valid_move(current, next_point, warehouse, is_on_second_level=False):
+def is_valid_move(current, next_point, warehouse):
     if next_point not in warehouse or warehouse[next_point] == "shelf":
         return False  
     
