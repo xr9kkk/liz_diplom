@@ -33,3 +33,5 @@ document.getElementById("route-form").addEventListener("submit", function (event
             console.error('Ошибка:', error);
         });
 });
+
+//ошибка в моменте возвращения img src вот здесь надо пофикисить
