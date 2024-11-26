@@ -1,4 +1,3 @@
-// Функция для отправки данных на сервер и получения маршрута
 async function fetchRouteData(event) {
     event.preventDefault();
 
@@ -22,18 +21,28 @@ async function fetchRouteData(event) {
 
     const data = await response.json();
     if (response.ok) {
-        buildPlot(data.coordinates);
+        // Отобразить результаты
+        displayResults(data);
+        // Построить 3D график
+        buildPlot(data.coordinates, data.warehouse);
     } else {
         alert('Ошибка: ' + data.error);
     }
 }
 
+function displayResults(data) {
+    document.getElementById('optimal-order').textContent = `Оптимальный порядок точек: ${data.optimal_order}`;
+    document.getElementById('shortest-path').textContent = `Кратчайший маршрут: ${data.shortest_path}`;
+    document.getElementById('steps-count').textContent = `Количество шагов: ${data.steps_count}`;
+}
+
 // Функция для построения 3D графика маршрута
-function buildPlot(coordinates) {
+function buildPlot(coordinates, warehouse) {
     const xCoords = coordinates.x;
     const yCoords = coordinates.y;
     const zCoords = coordinates.z;
 
+    // Данные маршрута для визуализации
     const routeData = {
         x: xCoords,
         y: yCoords,
@@ -45,17 +54,46 @@ function buildPlot(coordinates) {
         name: 'Маршрут'
     };
 
+    // Создаем полки для визуализации
+    const shelvesData = [];
+    for (let shelf in warehouse) {
+        if (warehouse[shelf] === 'shelf') {
+            const [shelfLetter, layer, row] = shelf.split('-');
+            const x = ord(shelfLetter) - ord('A') + 1; // Преобразуем букву в число
+            const y = parseInt(layer);
+            const z = parseInt(row);
+            
+            shelvesData.push({
+                x: [x],
+                y: [y],
+                z: [z],
+                type: 'scatter3d',
+                mode: 'markers',
+                marker: { color: 'green', size: 8 },
+                name: `Полка ${shelf}`
+            });
+        }
+    }
+
+    // Объединяем данные маршрута и полок
+    const dataToPlot = [routeData, ...shelvesData];
+
+    // Настройки для визуализации
     const layout = {
         title: '3D Маршрут на складе',
         scene: {
-            xaxis: { title: 'Стеллажи (A-M)', tickvals: Array.from({ length: 13 }, (_, i) => i) },
-            yaxis: { title: 'Ярусы (1-13)', tickvals: Array.from({ length: 13 }, (_, i) => i) },
-            zaxis: { title: 'Ряды (1-3)', tickvals: Array.from({ length: 3 }, (_, i) => i) }
+            xaxis: { title: 'Стеллажи (A-M)', tickvals: Array.from({ length: 13 }, (_, i) => i + 1) },
+            yaxis: { title: 'Ярусы (1-13)', tickvals: Array.from({ length: 13 }, (_, i) => i + 1) },
+            zaxis: { title: 'Ряды (1-3)', tickvals: Array.from({ length: 3 }, (_, i) => i + 1) }
         }
     };
 
-    Plotly.newPlot('warehouse3d', [routeData], layout);
+    Plotly.newPlot('warehouse3d', dataToPlot, layout);
 }
 
-// Добавляем обработчик отправки формы
+// Функция для преобразования буквы в ASCII
+function ord(char) {
+    return char.charCodeAt(0);
+}
+
 document.getElementById('route-form').addEventListener('submit', fetchRouteData);

@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-
 </head>
 <body>
     <div class="container">
         <h1>Маршрутизатор склада</h1>
+
+        <!-- Форма для маршрута -->
         <form id="route-form">
             <label for="start-point">Начальная точка:</label>
             <input type="text" id="start-point" name="start_point" placeholder="Например, G-1-1" required>
@@ -24,10 +25,20 @@
 
             <button type="submit">Рассчитать</button>
         </form>
-        <div id="result"></div>
-        <div id="warehouse3d" style="width: 100%; height: 600px;"></div>
 
-        <div id="visualization-container" style="width: 100%; height: 500px;"></div>
+        <!-- Секция результатов -->
+        <div id="result-section">
+            <h2>Результаты маршрута</h2>
+            <p id="optimal-order">Оптимальный порядок точек: </p>
+            <p id="shortest-path">Кратчайший маршрут: </p>
+            <p id="steps-count">Количество шагов: </p>
+        </div>
+
+        <!-- Секция визуализации -->
+        <div id="visualization-section">
+            <h2>3D Визуализация склада</h2>
+            <div id="warehouse3d" style="width: 100%; height: 600px;"></div>
+        </div>
     </div>
 
     <script src="/static/script.js"></script>
