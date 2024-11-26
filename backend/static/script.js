@@ -36,7 +36,6 @@ function displayResults(data) {
     document.getElementById('steps-count').textContent = `Количество шагов: ${data.steps_count}`;
 }
 
-// Функция для построения 3D графика маршрута
 function buildPlot(coordinates, warehouse) {
     const xCoords = coordinates.x;
     const yCoords = coordinates.y;
@@ -54,24 +53,28 @@ function buildPlot(coordinates, warehouse) {
         name: 'Маршрут'
     };
 
-    // Создаем полки для визуализации
+    // Создаем данные для полок
     const shelvesData = [];
-    for (let shelf in warehouse) {
-        if (warehouse[shelf] === 'shelf') {
-            const [shelfLetter, layer, row] = shelf.split('-');
-            const x = ord(shelfLetter) - ord('A') + 1; // Преобразуем букву в число
-            const y = parseInt(layer);
-            const z = parseInt(row);
-            
-            shelvesData.push({
-                x: [x],
-                y: [y],
-                z: [z],
-                type: 'scatter3d',
-                mode: 'markers',
-                marker: { color: 'green', size: 8 },
-                name: `Полка ${shelf}`
-            });
+    const allShelves = Array.from({ length: 13 }, (_, i) => String.fromCharCode(65 + i)); // A-M
+    const maxLayer = 13;
+    const maxRow = 3;
+
+    for (let letter of allShelves) {
+        for (let layer = 1; layer <= maxLayer; layer++) {
+            for (let row = 1; row <= maxRow; row++) {
+                const shelfKey = `${letter}-${layer}-${row}`;
+                if (warehouse[shelfKey] === 'shelf') {
+                    shelvesData.push({
+                        x: [ord(letter) - ord('A') + 1],
+                        y: [layer],
+                        z: [row],
+                        type: 'scatter3d',
+                        mode: 'markers',
+                        marker: { color: 'green', size: 6 },
+                        name: `Полка ${shelfKey}`
+                    });
+                }
+            }
         }
     }
 
@@ -82,13 +85,28 @@ function buildPlot(coordinates, warehouse) {
     const layout = {
         title: '3D Маршрут на складе',
         scene: {
-            xaxis: { title: 'Стеллажи (A-M)', tickvals: Array.from({ length: 13 }, (_, i) => i + 1) },
-            yaxis: { title: 'Ярусы (1-13)', tickvals: Array.from({ length: 13 }, (_, i) => i + 1) },
-            zaxis: { title: 'Ряды (1-3)', tickvals: Array.from({ length: 3 }, (_, i) => i + 1) }
+            xaxis: {
+                title: 'Стеллажи (A-M)',
+                tickvals: Array.from({ length: 13 }, (_, i) => i + 1), // Значения тиков от 1 до 13
+                ticktext: Array.from({ length: 13 }, (_, i) => String.fromCharCode(65 + i)) // Буквы A-M
+            },
+            yaxis: {
+                title: 'Ярусы (1-13)',
+                tickvals: Array.from({ length: 13 }, (_, i) => i + 1)
+            },
+            zaxis: {
+                title: 'Ряды (1-3)',
+                tickvals: Array.from({ length: 3 }, (_, i) => i + 1)
+            }
         }
     };
 
     Plotly.newPlot('warehouse3d', dataToPlot, layout);
+}
+
+// Функция для преобразования буквы в ASCII
+function ord(char) {
+    return char.charCodeAt(0);
 }
 
 // Функция для преобразования буквы в ASCII
