@@ -8,15 +8,27 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.25.9",
     "@react-three/drei": "^9.117.3",
     "@react-three/fiber": "^8.17.10",
     "axios": "^1.7.8",
+    "babel-loader": "^9.2.1",
+    "css-loader": "^7.1.2",
     "plotly.js": "^2.35.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-plotly.js": "^2.6.0",
+    "style-loader": "^4.0.0",
     "three": "^0.170.0"
-  }
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "^5.6.3",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0"
+  },
+  "description": ""
 }
